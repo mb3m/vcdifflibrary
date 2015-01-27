@@ -34,6 +34,15 @@ namespace VcdiffLibrary
         public void Decode()
         {
             ReadHeader();
+
+            while (DecodeWindow()) ;
+        }
+
+        internal bool DecodeWindow()
+        {
+            // TODO Decode window
+
+            return false;
         }
 
         internal void ReadHeader()
