@@ -44,24 +44,46 @@ namespace VcdiffLibrary
             return (byte)b;
         }
 
+        /// <summary>
+        /// Read an int encoded using the portable, variable-sized format used in vcdiff.
+        /// </summary>
+        /// <remarks>
+        /// This format consists of a number in base 128, where each digit is encoded in the
+        /// lower seven bits of a byte.
+        /// 
+        /// Except for the least significant byte (the last when reading from left to right), other
+        /// bytes have their most significant bit turned on to indicate that there are still more
+        /// digits in the encoding.
+        /// </remarks>
         internal static int ReadBigEndian7BitEncodedInt(Stream stream)
         {
+            // we assume that an unsigned int is 5 bytes max
+            const int maxLen = 5;
+            const byte valueMask = 0x7f;
+            const byte continuationMask = 0x80;
+
             var ret = 0;
-            for (var i = 0; i < 5; i++)
+
+            for (var i = 0; i < maxLen; i++)
             {
                 var b = stream.ReadByte();
                 if (b == -1)
                 {
+                    // we reached the end of the stream without any value, it's an unsupported state
                     throw new EndOfStreamException();
                 }
-                ret = (ret << 7) | (b & 0x7f);
-                if ((b & 0x80) == 0)
+
+                // we shift the value 128 to the left, then add the byte value (ignoring the continuation bit)
+                ret = (ret << 7) | (b & valueMask);
+
+                if ((b & continuationMask) == 0)
                 {
+                    // There a no more values
                     return ret;
                 }
             }
 
-            // Still haven't seen a byte with the high bit unset? Dodgy data.
+            // More than 5 bytes ? Unsupported scenario
             throw new IOException("Invalid 7-bit encoded integer in stream.");
         }
     }
