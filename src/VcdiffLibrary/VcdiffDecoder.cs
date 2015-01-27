@@ -22,6 +22,10 @@ namespace VcdiffLibrary
             if (delta == null) throw new ArgumentNullException("delta");
             if (target == null) throw new ArgumentNullException("target");
 
+            if (!origin.CanRead || !origin.CanSeek) throw new ArgumentException("The origin stream must support reading and seeking", "origin");
+            if (!delta.CanRead) throw new ArgumentException("The delta stream must support reading", "delta");
+            if (!target.CanRead || !target.CanWrite || !target.CanSeek) throw new ArgumentException("The target stream must support reading, writing and seeking", "origin");
+
             this.origin = origin;
             this.delta = delta;
             this.target = target;
