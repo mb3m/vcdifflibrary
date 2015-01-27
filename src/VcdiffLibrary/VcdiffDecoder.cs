@@ -3,8 +3,15 @@ using System.IO;
 
 namespace VcdiffLibrary
 {
+    /// <summary>
+    /// Decoding implementation of VCDIFF algorithm and file format, from <a href="http://tools.ietf.org/html/rfc3284">RFC 3284</a>.
+    /// </summary>
     public class VcdiffDecoder
     {
+        private const int VCD_DECOMPRESS = 0x1;
+        private const int VCD_CODETABLE = 0x2;
+        private const int VCD_MASK = 0xf8;
+
         private readonly Stream origin;
         private readonly Stream delta;
         private readonly Stream target;
@@ -22,7 +29,7 @@ namespace VcdiffLibrary
 
         public void Decode()
         {
-            this.ReadHeader();
+            ReadHeader();
         }
 
         internal void ReadHeader()
@@ -40,60 +47,23 @@ namespace VcdiffLibrary
             }
 
             // Load the header indicator
-            var headerIndicator = IOUtils.CheckedReadByte(delta);
-            if ((headerIndicator & 1) != 0)
+            var hdrIndicator = IOUtils.CheckedReadByte(delta);
+
+            if ((hdrIndicator & VCD_MASK) != 0)
+            {
+                throw new VcdiffFormatException("Invalid header indicator - only bits 1 and 2 can be set.");
+            }
+
+            if ((hdrIndicator & VCD_DECOMPRESS) != 0)
             {
                 throw new VcdiffFormatException("This implementation does not support delta stream with secondary compressors");
             }
 
-            var customCodeTable = ((headerIndicator & 2) != 0);
-            var applicationHeader = ((headerIndicator & 4) != 0);
-
-            if ((headerIndicator & 0xf8) != 0)
+            if ((hdrIndicator & VCD_CODETABLE) != 0)
             {
-                throw new VcdiffFormatException("Invalid header indicator - bits 3-7 not all zero.");
+                throw new VcdiffFormatException("This implementation does not support application-defined code tables");
+                // TODO ReadCodeTable();
             }
-
-            // Load the custom code table, if there is one
-            if (customCodeTable)
-            {
-                ReadCodeTable();
-            }
-
-            // Ignore the application header if we have one. This tells xdelta3 what the right filenames are.
-            if (applicationHeader)
-            {
-                int appHeaderLength = IOUtils.ReadBigEndian7BitEncodedInt(delta);
-                IOHelper.CheckedReadBytes(delta, appHeaderLength);
-            }
-        }
-
-        /// <summary>
-        /// Reads the custom code table, if there is one
-        /// </summary>
-        void ReadCodeTable()
-        {
-            // The length given includes the nearSize and sameSize bytes
-            int compressedTableLength = IOHelper.ReadBigEndian7BitEncodedInt(delta) - 2;
-            int nearSize = IOHelper.CheckedReadByte(delta);
-            int sameSize = IOHelper.CheckedReadByte(delta);
-            byte[] compressedTableData = IOHelper.CheckedReadBytes(delta, compressedTableLength);
-
-            byte[] defaultTableData = CodeTable.Default.GetBytes();
-
-            MemoryStream tableOriginal = new MemoryStream(defaultTableData, false);
-            MemoryStream tableDelta = new MemoryStream(compressedTableData, false);
-            byte[] decompressedTableData = new byte[1536];
-            MemoryStream tableOutput = new MemoryStream(decompressedTableData, true);
-            VcdiffDecoder.Decode(tableOriginal, tableDelta, tableOutput);
-
-            if (tableOutput.Position != 1536)
-            {
-                throw new VcdiffFormatException("Compressed code table was incorrect size");
-            }
-
-            codeTable = new CodeTable(decompressedTableData);
-            cache = new AddressCache(nearSize, sameSize);
         }
     }
 }
