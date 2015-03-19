@@ -8,9 +8,11 @@ namespace VcdiffLibrary
     /// </summary>
     public class VcdiffDecoder
     {
-        private const int VCD_DECOMPRESS = 0x1;
-        private const int VCD_CODETABLE = 0x2;
-        private const int VCD_MASK = 0xf8;
+        private const byte VCD_DECOMPRESS = 0x1;
+        private const byte VCD_CODETABLE = 0x2;
+        private const byte VCD_MASK = 0xf8;
+        private const byte VCD_SOURCE = 0x1;
+        private const byte VCD_TARGET = 0x2;
 
         private readonly Stream origin;
         private readonly Stream delta;
@@ -35,12 +37,29 @@ namespace VcdiffLibrary
         {
             ReadHeader();
 
-            while (DecodeWindow()) ;
+            while (DecodeWindow()) {
+                // TODO
+            };
         }
 
         internal bool DecodeWindow()
         {
-            // TODO Decode window
+            // Win_Indicator
+            var indicator = IOUtils.CheckedReadByte(delta);
+
+            var fromSource = ((indicator & VCD_SOURCE) != 0);
+            var fromTarget = ((indicator & VCD_TARGET) != 0);
+
+            if (fromSource && fromTarget) {
+                throw new VcdiffFormatException("Invalid window indicator : only one bit of VCD_SOURCE and VCD_TARGET must be set");
+            }
+
+            var sourceLength = 0;
+            var sourcePosition = 0;
+            if (fromSource || fromTarget) {
+                sourceLength = IOUtils.ReadBigEndian7BitEncodedInt(delta);
+                sourcePosition = IOUtils.ReadBigEndian7BitEncodedInt(delta);
+            }
 
             return false;
         }
