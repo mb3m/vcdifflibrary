@@ -1,11 +1,18 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.22823.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VcdiffLibrary", "src\VcdiffLibrary\VcdiffLibrary.csproj", "{3F4B8225-2ACC-4284-AC84-DCDC1BB9E83F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VcdiffLibrary.Tests", "tests\VcdiffLibrary.Tests\VcdiffLibrary.Tests.csproj", "{86065D48-8E2C-425F-B5F5-A0AABD22B84D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{0E8EF92F-9A77-44B7-8EB0-25A3690B0451}"
+	ProjectSection(SolutionItems) = preProject
+		doc\rfc3284.txt = doc\rfc3284.txt
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VcdiffLibrary.Console", "src\VcdiffLibrary.Console\VcdiffLibrary.Console.csproj", "{54373AAC-6EAC-4F62-8BE8-865EABAAEE07}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +28,10 @@ Global
 		{86065D48-8E2C-425F-B5F5-A0AABD22B84D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{86065D48-8E2C-425F-B5F5-A0AABD22B84D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{86065D48-8E2C-425F-B5F5-A0AABD22B84D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{54373AAC-6EAC-4F62-8BE8-865EABAAEE07}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{54373AAC-6EAC-4F62-8BE8-865EABAAEE07}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{54373AAC-6EAC-4F62-8BE8-865EABAAEE07}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{54373AAC-6EAC-4F62-8BE8-865EABAAEE07}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
